@@ -1,0 +1,133 @@
+================================================================
+         NETWORK FILE SYSTEM (NFS) - EXPERIMENT COMMANDS
+================================================================
+
+----------------------------------------------------------------
+PART A: NFS SERVER SETUP
+----------------------------------------------------------------
+
+[SERVER - Step 1] Install NFS Server
+--------------------------------------
+sudo apt update
+sudo apt install nfs-kernel-server -y
+sudo systemctl status nfs-kernel-server
+
+
+[SERVER - Step 2] Create Shared Directory
+------------------------------------------
+sudo mkdir -p /srv/nfs/shared
+sudo chown nobody:nogroup /srv/nfs/shared
+sudo chmod 777 /srv/nfs/shared
+
+
+[SERVER - Step 3] Configure Export File
+-----------------------------------------
+sudo nano /etc/exports
+
+# Add this line inside the file:
+# /srv/nfs/shared 127.0.0.1(rw,sync,no_subtree_check,no_root_squash)
+
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+sudo exportfs -v
+
+
+----------------------------------------------------------------
+PART B: NFS CLIENT SETUP
+----------------------------------------------------------------
+
+[CLIENT - Step 4] Install NFS Client
+--------------------------------------
+sudo apt install nfs-common -y
+
+
+[CLIENT - Step 5] Create Mount Point
+--------------------------------------
+sudo mkdir -p /mnt/nfs_client
+
+
+[CLIENT - Step 6] Mount NFS Share
+-----------------------------------
+sudo mount -t nfs 127.0.0.1:/srv/nfs/shared /mnt/nfs_client
+mount | grep nfs
+df -h
+
+
+----------------------------------------------------------------
+PART C: VERIFY CONNECTION
+----------------------------------------------------------------
+
+[CLIENT - Step 7] Create File from Client
+------------------------------------------
+cd /mnt/nfs_client
+echo "Hello from Client" > testfile.txt
+cat testfile.txt
+
+
+[SERVER - Step 8] Verify File on Server
+-----------------------------------------
+cd /srv/nfs/shared
+ls
+cat testfile.txt
+
+
+----------------------------------------------------------------
+PART D: PERFORMANCE TESTING
+----------------------------------------------------------------
+
+[CLIENT] Test 1 - SYNC Mount
+------------------------------
+sudo umount /mnt/nfs_client
+sudo mount -t nfs -o rw,sync 127.0.0.1:/srv/nfs/shared /mnt/nfs_client
+time dd if=/dev/zero of=/mnt/nfs_client/test.img bs=1M count=100
+rm /mnt/nfs_client/test.img
+sudo umount /mnt/nfs_client
+
+
+[CLIENT] Test 2 - ASYNC Mount
+-------------------------------
+sudo mount -t nfs -o rw,async 127.0.0.1:/srv/nfs/shared /mnt/nfs_client
+time dd if=/dev/zero of=/mnt/nfs_client/test.img bs=1M count=100
+rm /mnt/nfs_client/test.img
+sudo umount /mnt/nfs_client
+
+
+[CLIENT] Test 3 - NOATIME Mount
+---------------------------------
+sudo mount -t nfs -o rw,noatime 127.0.0.1:/srv/nfs/shared /mnt/nfs_client
+time dd if=/dev/zero of=/mnt/nfs_client/test.img bs=1M count=100
+rm /mnt/nfs_client/test.img
+sudo umount /mnt/nfs_client
+
+
+----------------------------------------------------------------
+PART E: CLEANUP
+----------------------------------------------------------------
+
+[CLIENT] Step 1 - Unmount NFS Share
+-------------------------------------
+sudo umount /mnt/nfs_client
+mount | grep nfs
+
+
+[SERVER] Step 2 - Remove Export Entry
+---------------------------------------
+sudo nano /etc/exports
+# Remove the line: /srv/nfs/shared 127.0.0.1(...)
+sudo exportfs -a
+
+
+[SERVER] Step 3 - Stop NFS Service
+-------------------------------------
+sudo systemctl stop nfs-kernel-server
+sudo systemctl disable nfs-kernel-server
+
+
+[SERVER] Step 4 - Uninstall Packages
+--------------------------------------
+sudo apt remove nfs-kernel-server -y
+sudo apt remove nfs-common -y
+
+================================================================
+                          END OF FILE
+================================================================

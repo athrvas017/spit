@@ -1,0 +1,120 @@
+================================================================
+     EXPERIMENT 3: MANAGING LINUX PERMISSIONS
+            (User, Group, and Others)
+================================================================
+
+----------------------------------------------------------------
+PART A: GROUP CREATION
+----------------------------------------------------------------
+
+[Step 1] Create Groups
+------------------------
+sudo groupadd dev1
+sudo groupadd test1
+sudo groupadd -g 1050 project_read
+
+
+----------------------------------------------------------------
+PART B: USER CREATION
+----------------------------------------------------------------
+
+[Step 2] Create Users
+-----------------------
+sudo useradd developer
+sudo useradd -m tester
+
+[Step 3] Set Passwords
+------------------------
+sudo passwd developer
+sudo passwd tester
+
+
+----------------------------------------------------------------
+PART C: ASSIGN USERS TO GROUPS
+----------------------------------------------------------------
+
+[Step 4] Add Users to Groups
+------------------------------
+sudo usermod -aG dev1,project_read developer
+sudo usermod -aG test1,project_read tester
+
+[Verify] Check group memberships
+----------------------------------
+groups developer
+groups tester
+
+
+----------------------------------------------------------------
+PART D: CREATE PROJECT DIRECTORY & FILES
+----------------------------------------------------------------
+
+[Step 5] Create Directory (requires root)
+------------------------------------------
+sudo mkdir /project
+
+[Step 6] Create Files
+-----------------------
+sudo touch /project/app.txt
+sudo touch /project/test.txt
+
+
+----------------------------------------------------------------
+PART E: SET OWNERSHIP (chown)
+----------------------------------------------------------------
+
+[Step 7] Change File Ownership
+--------------------------------
+sudo chown developer:project_read /project/app.txt
+sudo chown tester:project_read /project/test.txt
+sudo chown root:project_read /project
+
+
+----------------------------------------------------------------
+PART F: SET PERMISSIONS (chmod)
+----------------------------------------------------------------
+
+[Step 8] Apply Permissions
+----------------------------
+sudo chmod 640 /project/app.txt
+sudo chmod 640 /project/test.txt
+sudo chmod 750 /project
+
+
+----------------------------------------------------------------
+PART G: VERIFY PERMISSIONS
+----------------------------------------------------------------
+
+[Step 9] List Permissions
+---------------------------
+sudo ls -l /project
+sudo ls -ld /project
+
+
+----------------------------------------------------------------
+PART H: TEST ACCESS BY SWITCHING USERS
+----------------------------------------------------------------
+
+[Step 10] Switch to Developer and Test
+---------------------------------------
+su - developer
+cat /project/app.txt
+echo "app development in progress" >> /project/app.txt
+cat /project/app.txt
+echo "no bugs" >> /project/test.txt   # Should be DENIED
+cat /project/test.txt
+exit
+
+[Step 11] Switch to Tester and Test
+-------------------------------------
+su - tester
+cd /project
+ls
+echo "test in progress" >> /project/test.txt
+cat /project/test.txt
+echo "app is not working" >> /project/app.txt   # Should be DENIED
+cat /project/app.txt
+exit
+
+================================================================
+                          END OF FILE
+================================================================

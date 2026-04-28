@@ -1,0 +1,117 @@
+================================================================
+     EXPERIMENT 2: LINUX USER & GROUP MANAGEMENT COMMANDS
+================================================================
+
+----------------------------------------------------------------
+PART A: GROUP CREATION
+----------------------------------------------------------------
+
+[Step 1] Create Groups
+------------------------
+sudo groupadd dev
+sudo groupadd tester
+
+[Verify] Check groups exist
+-----------------------------
+cat /etc/group | grep -E "dev"
+cat /etc/group | grep -E "tester"
+
+
+----------------------------------------------------------------
+PART B: USER CREATION
+----------------------------------------------------------------
+
+[Step 2] Create User with Group and Home Directory
+----------------------------------------------------
+sudo useradd -m -g dev john
+sudo passwd john
+
+[Step 3] Add User to Additional Group
+---------------------------------------
+sudo usermod -aG tester john
+groups john
+
+[Verify] Check user info
+--------------------------
+id john
+cat /etc/passwd
+cat /etc/group
+
+
+----------------------------------------------------------------
+PART C: MODIFY USER
+----------------------------------------------------------------
+
+[Step 4] Rename User
+----------------------
+sudo usermod -l john_new john
+
+[Step 5] Change Home Directory
+--------------------------------
+sudo usermod -d /home/john_new -m -n john_new john_new
+
+[Step 6] Change Primary Group
+-------------------------------
+sudo usermod -g tester john_new
+
+[Step 7] Rename Group
+-----------------------
+sudo groupmod -n developers dev
+getent group developers
+
+
+----------------------------------------------------------------
+PART D: LOCK / UNLOCK USER
+----------------------------------------------------------------
+
+[Step 8] Lock User Account
+----------------------------
+sudo usermod -L john_new
+sudo passwd -S john_new
+
+[Step 9] Unlock User Account
+------------------------------
+sudo usermod -U john_new
+sudo passwd -S john_new
+
+
+----------------------------------------------------------------
+PART E: SWITCH USER & VERIFY
+----------------------------------------------------------------
+
+[Step 10] Switch User
+-----------------------
+su john_new
+
+[Step 11] Fetch User/Group Info
+---------------------------------
+getent passwd john_new
+getent group developers
+getent group tester
+
+
+----------------------------------------------------------------
+PART F: DELETE USER & GROUP
+----------------------------------------------------------------
+
+[Step 12] Delete User (with Home Directory)
+--------------------------------------------
+sudo userdel -r john_new
+id john_new
+
+[Step 13] Delete Groups
+-------------------------
+sudo groupdel developers
+sudo groupdel tester
+
+[Verify] Confirm deletion
+---------------------------
+cat /etc/group | grep -E "developers"
+cat /etc/group | grep -E "tester"
+getent group developers
+getent group tester
+getent group dev
+
+================================================================
+                          END OF FILE
+================================================================

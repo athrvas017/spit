@@ -1,0 +1,109 @@
+================================================================
+     EXPERIMENT 4: SHELL SCRIPTING - AUTOMATED USER CREATION
+================================================================
+
+----------------------------------------------------------------
+PART A: CREATE THE SCRIPT FILE
+----------------------------------------------------------------
+
+[Step 1] Open nano editor and create script
+--------------------------------------------
+nano create_user.sh
+
+# Paste the following script inside nano, then save (Ctrl+O, Enter, Ctrl+X):
+
+----------------------------------------------------------------
+SCRIPT CONTENT (create_user.sh)
+----------------------------------------------------------------
+
+#!/bin/bash
+DEFAULT_SHELL="/bin/bash"
+HOME_BASE="/home"
+LOG_FILE="/var/log/user_creation.log"
+
+error_exit() {
+    echo "ERROR: $1"
+    exit 1
+}
+
+if [[ "$EUID" -ne 0 ]]; then
+    error_exit "This script must be run as root."
+fi
+
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 username [shell]"
+    exit 1
+fi
+
+USERNAME="$1"
+SHELL="${2:-$DEFAULT_SHELL}"
+HOME_DIR="$HOME_BASE/$USERNAME"
+
+if [[ ! -x "$SHELL" ]]; then
+    error_exit "Shell $SHELL does not exist or is not executable."
+fi
+
+if id "$USERNAME" &>/dev/null; then
+    error_exit "User '$USERNAME' already exists."
+fi
+
+useradd \
+    --create-home \
+    --home-dir "$HOME_DIR" \
+    --shell "$SHELL" \
+    "$USERNAME" || error_exit "Failed to create user."
+
+chmod 700 "$HOME_DIR"
+chown "$USERNAME:$USERNAME" "$HOME_DIR"
+
+echo "Set password for user '$USERNAME':"
+passwd "$USERNAME" || error_exit "Failed to set password."
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') User '$USERNAME' created with shell '$SHELL'" \
+    >> "$LOG_FILE"
+
+echo "User '$USERNAME' successfully created."
+echo "Home Directory: $HOME_DIR"
+echo "Default Shell: $SHELL"
+
+----------------------------------------------------------------
+END OF SCRIPT
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+PART B: MAKE SCRIPT EXECUTABLE & RUN
+----------------------------------------------------------------
+
+[Step 2] Make script executable
+---------------------------------
+chmod +x create_user.sh
+
+[Step 3] Run the script (as root)
+-----------------------------------
+sudo ./create_user.sh LA_Lab
+
+
+----------------------------------------------------------------
+PART C: VERIFY USER CREATION
+----------------------------------------------------------------
+
+[Step 4] Verify via commands
+------------------------------
+whoami
+id LA_Lab
+stat /home/LA_Lab
+getent passwd LA_Lab
+
+[Step 5] Switch to new user and verify
+----------------------------------------
+su - LA_Lab
+whoami
+pwd
+ls
+ls -ld
+exit
+
+================================================================
+                          END OF FILE
+================================================================

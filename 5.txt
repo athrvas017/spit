@@ -1,0 +1,122 @@
+================================================================
+     EXPERIMENT 5: PROCESS MANAGEMENT
+          (top, ps, kill commands)
+================================================================
+
+----------------------------------------------------------------
+PART A: ps COMMAND - STATIC SNAPSHOT
+----------------------------------------------------------------
+
+[Step 1] View current terminal processes
+------------------------------------------
+ps
+
+[Step 2] View all running processes (detailed)
+------------------------------------------------
+ps -ef
+
+[Step 3] View all processes with resource usage
+-------------------------------------------------
+ps aux
+
+
+----------------------------------------------------------------
+PART B: START A BACKGROUND PROCESS
+----------------------------------------------------------------
+
+[Step 4] Start a sleep process in background
+---------------------------------------------
+sleep 500 &
+
+[Step 5] Check running jobs
+-----------------------------
+jobs
+
+[Step 6] Verify process appears in ps
+---------------------------------------
+ps
+
+
+----------------------------------------------------------------
+PART C: kill COMMAND - PROCESS CONTROL
+----------------------------------------------------------------
+
+[Step 7] List all available signals
+-------------------------------------
+kill -l
+
+[Step 8] SIGSTOP - Pause/Stop a process (use PID from ps)
+----------------------------------------------------------
+kill -19 <PID>
+# Example: kill -19 8559
+jobs      # Should show [1]+ Stopped
+
+[Step 9] SIGCONT - Resume a paused process
+-------------------------------------------
+kill -18 <PID>
+# Example: kill -18 8559
+jobs      # Should show [1]+ Running
+
+[Step 10] SIGTERM - Politely terminate a process
+-------------------------------------------------
+kill -15 <PID>
+# Example: kill -15 8559
+jobs
+
+[Step 11] SIGKILL - Force kill a process
+------------------------------------------
+kill -9 <PID>
+# Example: kill -9 8559
+jobs      # Should show [1]+ Killed
+
+
+----------------------------------------------------------------
+PART D: top COMMAND - REAL-TIME MONITORING
+----------------------------------------------------------------
+
+[Step 12] Open top (real-time process monitor)
+-----------------------------------------------
+top
+
+# Key controls inside top:
+# q        -> Quit top
+# k        -> Kill a process (enter PID)
+# M        -> Sort by memory usage
+# P        -> Sort by CPU usage
+# 1        -> Show individual CPU cores
+
+[Step 13] Generate load to observe in top (open new terminal)
+--------------------------------------------------------------
+yes > /dev/null &
+
+# Observe CPU spike in top, then kill it:
+kill -15 <PID_of_yes>
+
+
+----------------------------------------------------------------
+PART E: STRESS TEST (optional - install stress tool)
+----------------------------------------------------------------
+
+[Step 14] Install stress tool
+-------------------------------
+sudo apt install stress -y
+
+[Step 15] Run CPU stress test and observe in top
+-------------------------------------------------
+stress --cpu 1 --vm-bytes 500M --timeout 1000s
+# Open top in another terminal to observe load
+
+
+----------------------------------------------------------------
+PART F: CLEANUP - KILL ALL BACKGROUND PROCESSES
+----------------------------------------------------------------
+
+[Step 16] Kill all background jobs
+-------------------------------------
+kill $(jobs -p)
+jobs
+
+
+================================================================
+                          END OF FILE
+================================================================
